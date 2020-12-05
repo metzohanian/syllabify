@@ -348,25 +348,9 @@ def generate(word):
     if phoneme_list:
         return map(factory, [phoneme_list[0]])  # first version only
     else: 
-        print(word + ' not in CMU dictionary, sorry, please try again...')
+        #print(word + ' not in CMU dictionary, sorry, please try again...')
         return None
 
 
 def get_raw(word):
     return CMUtranscribe(word)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        words = sys.argv[1:]
-        for word in words:
-            syllable = generate(word.rstrip())
-            raw = get_raw(word.rstrip())
-            if syllable:
-                for syll in syllable:
-                    for s in syll:
-                        print(s)  # print syllables
-                    print('\n')
-    else:
-        print('Please input a word, or list of words (space-separated) as argument variables')
-        print('e.g. python3 syllable3.py linguist linguistics')
