@@ -4,6 +4,7 @@
     changes other than print() statements noted
 '''
 import os, re, random, types, functools
+from repo import *
 
 # Settings 
 CMU_DIR = './CMU_dictionary' 
@@ -31,59 +32,24 @@ else:
 
 ## original class
 class CMUDictionary(object):
-    
+    ###
+    ###
+    ### REPLACE WITH CALL TO DICT_CMU TABLE
+    ###
+    ###
     def __init__(self, path_to_dictionary = PATH_TO_DICTIONARY):
-        
-        self.regexp = re.compile(r'''
-                        (?P<Comment>;;;.*) # ;;; denotes Comment: to be ignore
-                        |(?P<Word>'?\w+[^\(\)]*) # Not interested in first charcter
-                        (?P<Alternative> \(\d+\))? # (digit) denotes that another 
-                        (?P<Seperator> \s\s) # Seperator: to be ignored
-                        (?P<Phoneme> [^\n]+) # The remainder 
-                     ''', re.VERBOSE)
-        
-        # import CMU dictionary
-        try:
-            self.cmudict_file = open(path_to_dictionary)
-        except IOError as e:  # syntax change for Py3
-            print (e, 'file not found, check settings...')
-        # create Python CMU dictionary
-        self._cmudict = self._create_dictionary() 
-        self.cmudict_file.close()
+        pass
     
     def __getitem__(self, key):
         #if not isinstance(key, basestring):
             #raise KeyError('key must be of type: basestring')
         try:
-            return self._cmudict[key.upper()]  # ack: Dimitrios Alikaniotis https://gist.github.com/dimalik/440abc458fbcf4470171274d95efe67e
+            dbval = DB.session.query(DictCmu).filter(DictCmu.word==key)[0]
+            cmut = Transcription(dbval.phonemes)
+            return cmut
             #return self._cmudict[key.encode('utf-8').upper()]
         except (KeyError, UnicodeDecodeError):
             return None
-    
-    def _create_dictionary(self):
-        dict_temp = {}
-        for line in self.cmudict_file.readlines():    
-            match = re.match(self.regexp, line)
-            if match:
-                dict_temp = self._update_dictionary(match, dict_temp)
-        return dict_temp
-    
-    def _update_dictionary(self, match, dictionary):
-        if match.group('Word') == None:
-            # No word found, do nothing
-            return dictionary
-        
-        if match.group('Word') and (match.group('Alternative') == None):
-            # This is a new word
-            # Create an an entry, and instantiate a Transcription object
-            dictionary[match.group('Word')] = Transcription(match.group('Phoneme'))
-            return dictionary
-        
-        if match.group('Word') and match.group('Alternative'):
-            # There is an alternative phenome representation of the metched word
-            # Append phenome rep. to dictioanry entry for this word
-            dictionary[match.group('Word')].append(match.group('Phoneme'))            
-            return dictionary
 
 class Transcription(object):
     # load dictionary

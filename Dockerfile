@@ -10,6 +10,10 @@ RUN apt-get install -y libmysqlclient-dev sudo
 RUN apt-get update -y
 RUN apt-get install -y python3-pip wget nano
 
+RUN apt-get update
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y nginx apt-utils zip unzip gcc libmysqlclient-dev php7.4 php7.4-cli php7.4-json php7.4-mbstring php7.4-curl
+
 RUN mkdir -p /var/syllabify
 WORKDIR /var/syllabify
 COPY . .

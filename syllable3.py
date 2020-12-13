@@ -1,14 +1,16 @@
 ## updated to Python 3 from Python 2 original
 ## apart from print statements this involves: functools.reduce() and list(x) to get len() of map object
 
-import re, copy, sys, random, functools
+import re, copy, sys, random, functools, json
 from cmuparser3 import CMUtranscribe  # import Py3 version
 from syllable_types3 import Cluster, Consonant, Vowel, Empty, Rime, Syllable  # import Py3 version
 from phoneme_types import * 
 
+# new vowels: AX|AXR|IX|UX
+# new consonants: DX|EL|EM|EN|NX|Q|WH
 phoneme_classify = re.compile('''
-                        ((?P<Vowel>AO|UW|EH|AH|AA|IY|IH|UH|AE|AW|AY|ER|EY|OW|OY)
-                        |(?P<Consonant>CH|DH|HH|JH|NG|SH|TH|ZH|Z|S|P|R|K|L|M|N|F|G|D|B|T|V|W|Y\d*)
+                        ((?P<Vowel>AO|UW|EH|AH|AA|IY|IH|UH|AE|AW|AY|ER|EY|OW|OY|AX|AXR|IX|UX)
+                        |(?P<Consonant>CH|DH|HH|JH|NG|SH|TH|ZH|Z|S|P|R|K|L|M|N|F|G|D|B|T|V|W|Y|DX|EL|EM|EN|NX|Q|WH\d*)
                         )
                         ((?P<Stress>0|1|2)
                         )?
@@ -24,7 +26,7 @@ def factory(phoneme):
         phoneme_feature = re.match(phoneme_classify,phoneme).groupdict()
         #print(phoneme_feature)  # debug
         
-    #input is phoneme feature dictionary 
+        #input is phoneme feature dictionary 
         if phoneme_feature['Consonant']:
             # return consonant object
             return Consonant(**phoneme_feature)
@@ -62,6 +64,7 @@ def factory(phoneme):
             return cluster_list
     
     def syllable_fact(syllable_list, cluster):
+
         syllable = syllable_list.pop()
         #print(syllable)  # debug
         push = syllable_list.append
@@ -125,7 +128,8 @@ def factory(phoneme):
                 else:
                     new_syllable = Syllable()
                 push(new_syllable)
-                return syllable_list  
+                return syllable_list
+        #raise Exception("No syllable_list Response")  
     
     def check_last_syllable(syllable_list):
         # the syllable algorithm may assign a consonant cluster to a syllable that does not have
@@ -314,7 +318,7 @@ def onset_rules(cluster):
     # the second consonant must be liquid or glide /L/ /R/ /W/ /Y/
     # AC tests: 
     #if len(list(phonemes)) > 1 and not phonemes[0] == S and not phonemes[1] in [L,R,W,Y]:
-    if len(list_of_phonemes) > 1 and not list_of_phonemes[0] == S and not list_of_phonemes[1] in [L,R,W,Y] and len(list_of_phonemes) < 3:
+    if len(list_of_phonemes) > 1 and len(cluster.phoneme_list) > 0 and not list_of_phonemes[0] == S and not list_of_phonemes[1] in [L,R,W,Y] and len(list_of_phonemes) < 3:
         #print("onset rule 5")
         list_of_phonemes, coda_cluster = _remove_and_update()
 
@@ -342,14 +346,16 @@ def onset_rules(cluster):
 
 
 ''' Public Method '''
-def generate(word):
-    phoneme_list = CMUtranscribe(word)
-    #print(phoneme_list)
-    if phoneme_list:
-        return map(factory, [phoneme_list[0]])  # first version only
-    else: 
-        #print(word + ' not in CMU dictionary, sorry, please try again...')
-        return None
+def generate(word, phoneme = None):
+    if phoneme is not None:
+        return map(factory, [phoneme])
+    else:
+        phoneme_list = CMUtranscribe(word)
+        if phoneme_list:
+            print([phoneme_list[0]])
+            return map(factory, [phoneme_list[0]])  # first version only
+    #print(word + ' not in CMU dictionary, sorry, please try again...')
+    return None
 
 
 def get_raw(word):

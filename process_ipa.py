@@ -4,7 +4,7 @@ from repo import *
 rowcount = 1
 start = 0
 while rowcount > 0:
-  entries = DB.session.execute("SELECT cmu.id, cmu.word from dict_cmu cmu where syllables is null order by id limit :start, 500", { "start": start })
+  entries = DB.session.execute("SELECT ipa.id, ipa.word from dict_ipa ipa order by id limit :start, 500", { "start": start })
   start = start + 500
 
   print("Working " + str(start))
@@ -12,7 +12,7 @@ while rowcount > 0:
   for entry in entries:
     try:
       #print(entry.word.rstrip())
-      syllable = generate(entry.word.rstrip())
+      syllable = generate(entry.word.strip())
       if syllable:
         syllables = []
         encoding = []
@@ -20,17 +20,18 @@ while rowcount > 0:
           for s in syll:
             syllables.append(make_syllable(s))
             encoding.append(s)
-        cmu = DB.session.query(DictCmu).get(entry.id)
+        ipa = DB.session.query(DictIpa).get(entry.id)
         #print(json.dumps(syllables, default=lambda o: o.__dict__), "\r")
         #print(json.dumps(encoding, default=lambda o: o.__dict__), "\r")
-        cmu.syllables = json.dumps(syllables, default=lambda o: o.__dict__)
-        cmu.encoding = json.dumps(encoding, default=lambda o: o.__dict__)
-        DB.session.add(cmu)
+        ipa.syllables = json.dumps(syllables, default=lambda o: o.__dict__)
+        ipa.encoding = json.dumps(encoding, default=lambda o: o.__dict__)
+        DB.session.add(ipa)
         DB.session.flush()
         DB.session.commit()
     except:
       import traceback
       traceback.print_exc()
+      DB.session.rollback()
       print("Processing Error: " + entry.word)
 
   rowcount = entries.rowcount

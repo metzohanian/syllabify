@@ -15,6 +15,10 @@ VOWEL_TYPES = {
 	'IH' : { 'length' : 'short' }, 
 	'UH' : { 'length' : 'short' }, 
 	'AE' : { 'length' : 'short' }, 
+	'AX' : { 'length' : 'short' }, 
+	'AXR': { 'length' : 'short' }, 
+	'IX' : { 'length' : 'short' }, 
+	'UX' : { 'length' : 'short' }, 
 
 	# Long Vowels
 	'AW' : { 'length' : 'long' },
