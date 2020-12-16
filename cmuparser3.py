@@ -37,15 +37,16 @@ class CMUDictionary(object):
     ### REPLACE WITH CALL TO DICT_CMU TABLE
     ###
     ###
-    def __init__(self, path_to_dictionary = PATH_TO_DICTIONARY):
+    def __init__(self, dictionary = DictCmu):
+        self.Dictionary = dictionary
         pass
     
     def __getitem__(self, key):
         #if not isinstance(key, basestring):
             #raise KeyError('key must be of type: basestring')
         try:
-            dbval = DB.session.query(DictCmu).filter(DictCmu.word==key)[0]
-            cmut = Transcription(dbval.phonemes)
+            dbval = DB.session.query(self.Dictionary).filter(self.Dictionary.word==key)[0]
+            cmut = Transcription(dbval.arpabet)
             return cmut
             #return self._cmudict[key.encode('utf-8').upper()]
         except (KeyError, UnicodeDecodeError):
@@ -74,7 +75,7 @@ class Phoneme(object):
 
 
 ## create dictionary
-cmudict = CMUDictionary()
+cmudict = CMUDictionary(DictIpa)
 
 
 def CMUtranscribe(word):
